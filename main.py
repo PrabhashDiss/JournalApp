@@ -1,6 +1,7 @@
 import json
 from tkinter import *
 from datetime import datetime
+from openai import OpenAI
 
 def load_entries():
     try:
@@ -14,11 +15,40 @@ def save_entries(entries):
     with open("journal.json", "w") as file:
         json.dump(entries, file)
 
+def refine_entry(entry):
+    # Assuming you have set up the OpenAI client
+    client = OpenAI(base_url="http://localhost:1234/v1", api_key="lm-studio")
+
+    history = [
+        {"role": "system", "content": '''
+            You are here to help me write my journal entries.
+            Rewrite the following entry to make it sound better in past tense.
+            Give only the main points of the entry.
+         '''},
+        {"role": "user", "content": entry}
+    ]
+
+    completion = client.chat.completions.create(
+        messages=history,
+        model="gemma-2b-it-q8_0",
+        temperature=0.7,
+        stream=True,
+    )
+
+    refined_entry = ""
+    
+    for chunk in completion:
+        if chunk.choices[0].delta.content:
+            refined_entry += chunk.choices[0].delta.content
+
+    return refined_entry.split("\n\n")[-1]
+
 def add_entry():
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    things_did = entry_text.get(1.0, END).strip()
+    original_entry = entry_text.get(1.0, END).strip()
+    refined_entry = refine_entry(original_entry)
     today = datetime.now().strftime("%Y-%m-%d")
-    entry = {"timestamp": timestamp, "things_did": things_did}
+    entry = {"timestamp": timestamp, "things_did": refined_entry}
     if today in entries:
         entries[today].append(entry)
     else:
