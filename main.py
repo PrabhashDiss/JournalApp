@@ -41,32 +41,32 @@ def display_entries():
     for widget in window.winfo_children():
         widget.destroy()
     
-    add_button = Button(window, text="Add Entry", command=add_entry)
+    add_button = Button(window, text="Add Entry", command=add_entry, foreground="blue")
     add_button.pack(side="top", padx=10, pady=5)
 
     global entry_text
-    entry_text = Text(window, height=5, width=50)
+    entry_text = Text(window, height=5, width=50, foreground="black")
     entry_text.pack(side="top", padx=10, pady=5, fill="both", expand=True)
 
     global status_label
-    status_label = Label(window, text="")
+    status_label = Label(window, text="", foreground="green")
     status_label.pack(side="top", padx=10, pady=5)
 
     for day, day_entries in entries.items():
-        date_label = Label(window, text=f"--- {day} ---")
+        date_label = Label(window, text=f"--- {day} ---", foreground="red")
         date_label.pack(anchor="w", padx=10, pady=(5, 0))
 
         for i, entry in enumerate(day_entries):
             entry_frame = Frame(window)
             entry_frame.pack(anchor="w", padx=30, pady=(0, 5), fill="x")
 
-            timestamp_label = Label(entry_frame, text=f"Timestamp: {entry['timestamp']}")
+            timestamp_label = Label(entry_frame, text=f"Timestamp: {entry['timestamp']}", foreground="black")
             timestamp_label.pack(side="left")
 
-            things_did_label = Label(entry_frame, text=f"Things you did: {entry['things_did']}")
+            things_did_label = Label(entry_frame, text=f"Things you did: {entry['things_did']}", foreground="black")
             things_did_label.pack(side="left")
 
-            delete_button = Button(entry_frame, text="Delete", command=lambda d=day, index=i: delete_entry(d, index))
+            delete_button = Button(entry_frame, text="Delete", command=lambda d=day, index=i: delete_entry(d, index), foreground="red")
             delete_button.pack(side="right")
 
 def main():
