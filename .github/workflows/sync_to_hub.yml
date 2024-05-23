@@ -1,0 +1,19 @@
+name: Sync with Hugging Face Hub
+
+on:
+  push:
+    branches:
+      - gradio-version
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Sync with Hugging Face
+      uses: PrabhashDiss/huggingface-sync-action@v0.0.4
+      with:
+        github_repo_id: PrabhashDiss/JournalApp
+        huggingface_repo_id: Prabhash/JournalApp
+        repo_type: space
+        space_sdk: gradio
+        hf_token: ${{ secrets.HF_TOKEN }}
