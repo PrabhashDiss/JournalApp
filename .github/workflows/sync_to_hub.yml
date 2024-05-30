@@ -16,4 +16,5 @@ jobs:
         huggingface_repo_id: Prabhash/JournalApp
         repo_type: space
         space_sdk: gradio
+        hf_oauth: true
         hf_token: ${{ secrets.HF_TOKEN }}
