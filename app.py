@@ -121,6 +121,7 @@ def update_entry_dropdown(date):
     return gr.update(choices=[f"{index}. {value}" for index, value in get_entries_for_date(date)], value=f"{get_entries_for_date(date)[-1][0]}. {get_entries_for_date(date)[-1][1]}")
 def main_interface():
     with gr.Blocks() as app:
+        gr.LoginButton()
         with gr.Row():
             with gr.Column():
                 gr.Markdown("# Entries")
