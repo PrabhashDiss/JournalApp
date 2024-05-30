@@ -1,3 +1,2 @@
-# JournalApp
- 
+title: JournalApp
 hf_oauth: true
