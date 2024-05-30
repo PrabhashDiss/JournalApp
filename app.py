@@ -5,19 +5,22 @@ from gradio_client import Client
 
 def load_entries():
     try:
-        with open("journal.json", "r") as file:
+        file_path = name.split()[0].lower() + "_journal.json"
+        with open(file_path, "r") as file:
             entries = json.load(file)
     except FileNotFoundError:
         entries = {}
     return entries
 
 def save_entries(entries):
-    with open("journal.json", "w") as file:
+    file_path = name.split()[0].lower() + "_journal.json"
+    with open(file_path, "w") as file:
         json.dump(entries, file)
 
-entries = load_entries()
+entries = {}
 
 def display_entries():
+    entries = load_entries()
     markdown = ""
     for entry in entries:
         markdown += f"## {entry}\n"
@@ -121,7 +124,6 @@ def update_entry_dropdown(date):
     return gr.update(choices=[f"{index}. {value}" for index, value in get_entries_for_date(date)], value=f"{get_entries_for_date(date)[-1][0]}. {get_entries_for_date(date)[-1][1]}")
 def main_interface():
     with gr.Blocks() as app:
-        gr.LoginButton()
         with gr.Row():
             with gr.Column():
                 gr.Markdown("# Entries")
@@ -151,5 +153,19 @@ def main_interface():
 
     return app
 
+name = ""
+def show_main_interface(profile: gr.OAuthProfile | None):
+    if profile is None:
+        with gr.Blocks() as app:
+            gr.Markdown("Please log in to continue.")
+        return app
+    name = profile.name
+    return main_interface()
+
 if __name__ == "__main__":
-    main_interface().launch()
+    with gr.Blocks() as demo:
+        gr.LoginButton()
+
+        demo.load(show_main_interface, inputs=None, outputs=gr.Blocks())
+
+    demo.launch()
