@@ -1,2 +1,3 @@
 # JournalApp
  
+hf_oauth: true
