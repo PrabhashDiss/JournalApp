@@ -5,22 +5,31 @@ from gradio_client import Client
 
 def load_entries():
     try:
-        file_path = name.split()[0].lower() + "_journal.json"
-        with open(file_path, "r") as file:
+        with open("journal.json", "r") as file:
             entries = json.load(file)
     except FileNotFoundError:
         entries = {}
     return entries
 
 def save_entries(entries):
-    file_path = name.split()[0].lower() + "_journal.json"
-    with open(file_path, "w") as file:
+    with open("journal.json", "w") as file:
         json.dump(entries, file)
 
-entries = {}
+entries = load_entries()
+
+def upload_json(file):
+    with open(file, "r") as f:
+        entries = json.load(f)
+    with open("journal.json", "w") as f:
+        json.dump(entries, f)
+    entries = load_entries()
+    today = list(entries.keys())[-1]
+    return gr.update(value=display_entries()), gr.update(choices=list(entries.keys()), value=list(entries.keys())[-1] if entries else "No entries found."), gr.update(choices=[f"{index}. {value}" for index, value in get_entries_for_date(today)], value=f"{get_entries_for_date(today)[-1][0]}. {get_entries_for_date(today)[-1][1]}"), gr.update(choices=list(entries.keys()), value=list(entries.keys())[-1] if entries else "No entries found."), download_json()
+
+def download_json():
+    return gr.update(value="journal.json")
 
 def display_entries():
-    entries = load_entries()
     markdown = ""
     for entry in entries:
         markdown += f"## {entry}\n"
@@ -73,7 +82,7 @@ def add_entry(original_entry):
     else:
         entries[today] = [entry]
     save_entries(entries)
-    return gr.update(value=display_entries()), gr.update(choices=list(entries.keys()), value=list(entries.keys())[-1] if entries else "No entries found."), gr.update(choices=[f"{index}. {value}" for index, value in get_entries_for_date(today)], value=f"{get_entries_for_date(today)[-1][0]}. {get_entries_for_date(today)[-1][1]}"), gr.update(choices=list(entries.keys()), value=list(entries.keys())[-1] if entries else "No entries found.")
+    return gr.update(value=display_entries()), gr.update(choices=list(entries.keys()), value=list(entries.keys())[-1] if entries else "No entries found."), gr.update(choices=[f"{index}. {value}" for index, value in get_entries_for_date(today)], value=f"{get_entries_for_date(today)[-1][0]}. {get_entries_for_date(today)[-1][1]}"), gr.update(choices=list(entries.keys()), value=list(entries.keys())[-1] if entries else "No entries found."), download_json()
 
 def delete_entry(day, entry):
     index, value = entry.split(". ")
@@ -81,7 +90,7 @@ def delete_entry(day, entry):
     if not entries[day]:
         del entries[day]
     save_entries(entries)
-    return gr.update(value=display_entries()), gr.update(choices=list(entries.keys()), value=list(entries.keys())[-1] if entries else "No entries found."), gr.update(choices=[f"{index}. {value}" for index, value in get_entries_for_date(day)], value=f"{get_entries_for_date(day)[-1][0]}. {get_entries_for_date(day)[-1][1]}" if get_entries_for_date(day) else "No entries found for selected date."), gr.update(choices=list(entries.keys()), value=list(entries.keys())[-1] if entries else "No entries found.")
+    return gr.update(value=display_entries()), gr.update(choices=list(entries.keys()), value=list(entries.keys())[-1] if entries else "No entries found."), gr.update(choices=[f"{index}. {value}" for index, value in get_entries_for_date(day)], value=f"{get_entries_for_date(day)[-1][0]}. {get_entries_for_date(day)[-1][1]}" if get_entries_for_date(day) else "No entries found for selected date."), gr.update(choices=list(entries.keys()), value=list(entries.keys())[-1] if entries else "No entries found."), download_json()
 
 def show_entries_by_date(date):
     if date in entries:
@@ -145,27 +154,30 @@ def main_interface():
                 question_text = gr.Textbox(lines=5, placeholder="Ask a question about your journal entries...")
                 ask_button = gr.Button("Ask")
                 answer_markdown = gr.Markdown(value="")
-        add_button.click(fn=add_entry, inputs=entry_text, outputs=[entries_markdown, date_dropdown_delete, entry_dropdown, date_dropdown_show])
-        delete_button.click(fn=delete_entry, inputs=[date_dropdown_delete, entry_dropdown], outputs=[entries_markdown, date_dropdown_delete, entry_dropdown, date_dropdown_show])
+        gr.Markdown("# Upload JSON")
+        gr.Markdown("Upload a JSON file to load your journal entries. The JSON file should be in the following format: \n\n" + 
+                    "```json\n" + 
+                    "{\n" + 
+                    "  \"YYYY-MM-DD\": [\n" + 
+                    "    {\n" + 
+                    "      \"timestamp\": \"YYYY-MM-DD HH:MM:SS\",\n" + 
+                    "      \"things_did\": \"Things I did today\"\n" + 
+                    "    }\n" + 
+                    "  ]\n" + 
+                    "}\n" + 
+                    "```")
+        json_upload = gr.File(label="Upload JSON", file_types=["json"])
+        gr.Markdown("# Download JSON")
+        json_download = gr.File(label="Download JSON", file_types=["json"], value="journal.json")
+
+        json_upload.upload(upload_json, inputs=json_upload, outputs=[entries_markdown, date_dropdown_delete, entry_dropdown, date_dropdown_show, json_download])
+        add_button.click(fn=add_entry, inputs=entry_text, outputs=[entries_markdown, date_dropdown_delete, entry_dropdown, date_dropdown_show, json_download])
+        delete_button.click(fn=delete_entry, inputs=[date_dropdown_delete, entry_dropdown], outputs=[entries_markdown, date_dropdown_delete, entry_dropdown, date_dropdown_show, json_download])
         show_button.click(fn=show_entries_by_date, inputs=date_dropdown_show, outputs=selected_entries)
         ask_button.click(fn=ask_question, inputs=question_text, outputs=answer_markdown)
         date_dropdown_delete.change(update_entry_dropdown, inputs=date_dropdown_delete, outputs=entry_dropdown)
 
     return app
 
-name = ""
-def show_main_interface(profile: gr.OAuthProfile | None):
-    if profile is None:
-        with gr.Blocks() as app:
-            gr.Markdown("Please log in to continue.")
-        return app
-    name = profile.name
-    return main_interface()
-
 if __name__ == "__main__":
-    with gr.Blocks() as demo:
-        gr.LoginButton()
-
-        demo.load(show_main_interface, inputs=None, outputs=gr.Blocks())
-
-    demo.launch()
+    main_interface().launch()
