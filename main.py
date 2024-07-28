@@ -90,8 +90,6 @@ def run_conversation(message, history):
             function_args = json.loads(tool_call.function.arguments)
             logger.info(f"Calling function '{function_name}' with arguments:\n{function_args}")
             function_response = function_to_call(**function_args)
-            if function_response is None:
-                    function_response = "No response from function."
             logger.info(f"Function '{function_name}' executed successfully. Response:\n{function_response}")
             messages.append(
                 {
