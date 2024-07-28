@@ -17,6 +17,8 @@ def add_journal_entry(entry_text, date_time=None):
 
     subprocess.run(command, check=True)
 
+    return f"Journal entry added: {entry_text}"
+
 def view_all_entries():
     """View all journal entries."""
     command = ['jrnl', '-to', 'today']
