@@ -5,7 +5,7 @@ import json
 import gradio as gr
 
 client = Groq(api_key="your-api-key")
-MODEL = 'llama3-groq-70b-8192-tool-use-preview'
+MODEL = 'llama-3.1-70b-versatile'
 
 def run_conversation(message, history):
     logger.info(f"Received message:\n{message}")
