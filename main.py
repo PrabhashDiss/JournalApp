@@ -104,7 +104,7 @@ def run_conversation(message, history):
         messages.append(
             {
                 "role": "user",
-                "content": "Give me a response based on the history.",
+                "content": f"Give me the final response for the task ({message}) I requested.",
             }
         )
         second_response = client.chat.completions.create(
