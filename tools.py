@@ -23,3 +23,33 @@ def view_all_entries():
     command = ['jrnl', '-to', 'today']
     result = subprocess.run(command, capture_output=True, text=True, check=True)
     return result.stdout
+
+def view_entries_to(date):
+    """View all journal entries up to a specific date."""
+    command = ['jrnl', '-to', date]
+    result = subprocess.run(command, capture_output=True, text=True, check=True)
+    return result.stdout
+
+def view_last_entries(number):
+    """Display the last n journal entries."""
+    command = ['jrnl', '-n', str(number)]
+    result = subprocess.run(command, capture_output=True, text=True, check=True)
+    return result.stdout
+
+def view_entries_from_to(start_date, end_date):
+    """View journal entries within a specific date range."""
+    command = ['jrnl', '-from', start_date, '-to', end_date]
+    result = subprocess.run(command, capture_output=True, text=True, check=True)
+    return result.stdout
+
+def view_entries_on(date):
+    """Show journal entries for a specific date."""
+    command = ['jrnl', '-on', date]
+    result = subprocess.run(command, capture_output=True, text=True, check=True)
+    return result.stdout
+
+def search_entries(text):
+    """Search journal entries containing specific text."""
+    command = ['jrnl', '-contains', text]
+    result = subprocess.run(command, capture_output=True, text=True, check=True)
+    return result.stdout
