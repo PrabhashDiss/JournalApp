@@ -13,7 +13,7 @@ def run_conversation(message, history):
     messages = [
         {
             "role": "system",
-            "content": "You are a journal assistant. Use the add_journal_entry and view_all_entries functions to manage journal entries with correct grammar and punctuation.",
+            "content": "You are a journal assistant. Use the relevant tools to manage your journal entries with correct grammar and punctuation.",
         }
     ]
     for history_message in history:
