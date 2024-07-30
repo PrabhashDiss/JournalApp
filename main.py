@@ -16,7 +16,7 @@ def run_conversation(message, history):
             "content": "You are a journal assistant. Use the relevant tools to manage your journal entries with correct grammar and punctuation.",
         }
     ]
-    for history_message in history:
+    for history_message in history[-2:]:
         messages.append(
             {
                 "role": "user",
@@ -64,6 +64,95 @@ def run_conversation(message, history):
                     "required": [],
                 },
             },
+        },
+        {
+            "type": "function",
+            "function": {
+                "name": "view_entries_to",
+                "description": "View all journal entries up to a specific date",
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "date": {
+                            "type": "string",
+                            "description": "The end date in 'YYYY-MM-DD' format to view entries up to"
+                        }
+                    },
+                    "required": ["date"]
+                }
+            }
+        },
+        {
+            "type": "function",
+            "function": {
+                "name": "view_last_entries",
+                "description": "Display the last n journal entries",
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "number": {
+                            "type": "integer",
+                            "description": "The number of recent entries to display"
+                        }
+                    },
+                    "required": ["number"]
+                }
+            }
+        },
+        {
+            "type": "function",
+            "function": {
+                "name": "view_entries_from_to",
+                "description": "View journal entries within a specific date range",
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "start_date": {
+                            "type": "string",
+                            "description": "The start date of the range in 'YYYY-MM-DD' format"
+                        },
+                        "end_date": {
+                            "type": "string",
+                            "description": "The end date of the range in 'YYYY-MM-DD' format"
+                        }
+                    },
+                    "required": ["start_date", "end_date"]
+                }
+            }
+        },
+        {
+            "type": "function",
+            "function": {
+                "name": "view_entries_on",
+                "description": "Show journal entries for a specific date",
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "date": {
+                            "type": "string",
+                            "description": "The date to view entries for in 'YYYY-MM-DD' format"
+                        }
+                    },
+                    "required": ["date"]
+                }
+            }
+        },
+        {
+            "type": "function",
+            "function": {
+                "name": "search_entries",
+                "description": "Search journal entries containing specific text",
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "text": {
+                            "type": "string",
+                            "description": "The text to search for within the journal entries"
+                        }
+                    },
+                    "required": ["text"]
+                }
+            }
         }
     ]
     logger.info("Sending request to model with initial messages and tools.")
@@ -80,7 +169,12 @@ def run_conversation(message, history):
     if tool_calls:
         available_functions = {
             "add_journal_entry": add_journal_entry,
-            "view_all_entries": view_all_entries
+            "view_all_entries": view_all_entries,
+            "view_entries_to": view_entries_to,
+            "view_last_entries": view_last_entries,
+            "view_entries_from_to": view_entries_from_to,
+            "view_entries_on": view_entries_on,
+            "search_entries": search_entries
         }
         messages.append(response_message)
         logger.info("Processing tool calls from the model response.")
